@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, View, Text, StyleSheet, ScrollView } from 'react-native';
+import { Button, View, Text, StyleSheet, ScrollView, Linking, Pressable, TouchableOpacity } from 'react-native';
 
 const HelpScreen = ({ navigation }) => {
     return (
@@ -25,6 +25,32 @@ const HelpScreen = ({ navigation }) => {
                 <Text>6. Repeat steps 4 and 5.</Text>
                 <Text>7. The last person should tap "Finish".</Text>
                 <Text>8. The results will be displayed.</Text>
+
+                <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Notice:</Text>
+                <Text>
+                    This app is not a precision tuning tool.{"\n"}
+                    The pitch detection used in this app is based on a simplified {' '}
+                    <TouchableOpacity onPress={() => Linking.openURL('https://pubs.aip.org/asa/jasa/article-abstract/111/4/1917/547221/YIN-a-fundamental-frequency-estimator-for-speech')}>
+                        <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>YIN algorithm</Text>
+                    </TouchableOpacity>{' '}.
+                </Text>
+
+                <Pressable
+                    onPress={() =>
+                        Linking.openURL(
+                            'https://github.com/tyano463/tone_hunter/blob/main/ios/NativeInterface/yin_pitch_detector.c'
+                        )
+                    }
+                >
+                    <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
+                        View source code on GitHub
+                    </Text>
+                </Pressable>
+
+                <Text style={{ marginTop: 10 }}>
+                    Please do not use this app as a substitute for musical instruments in games,{"\n"}
+                    and do not bring your instrument to a music shop based on this app's results if it sounds out of tune.
+                </Text>
             </ScrollView>
         </View>
     )

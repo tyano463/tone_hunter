@@ -1,15 +1,17 @@
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Modal, Alert, Button, Text, View, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import { Camera } from 'react-native-vision-camera';
 import { Picker } from '@react-native-picker/picker'
 import fs from './FileAccess'
 import util from './utils'
+import db from './db';
 
 const HomeScreen = ({ navigation }) => {
     const bg = require('../assets/background.jpg')
     const [hasPermission, setHasPermission] = useState(false)
     const [micPermission, setMicPermission] = useState(false)
+    const [enablePhoto, setEnablePhoto] = useState(true)
 
     const [minTone, setMinTone] = useState(55);
     const [maxTone, setMaxTone] = useState(72);
@@ -21,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
 
     const [isModalVisible, setModalVisible] = useState(false);
 
-
+    const isFocused = useIsFocused();
 
     useEffect(() => {
         (async () => {
@@ -49,24 +51,34 @@ const HomeScreen = ({ navigation }) => {
         })();
     }, []);
 
-
-    useFocusEffect(
-        useCallback(() => {
+    useEffect(() => {
+        console.log("isFocused: " + isFocused)
+        if (isFocused) {
+            console.log("isFocused");
             (async () => {
-                const loadedMin = await fs.load_settings("minTone");
-                const loadedMax = await fs.load_settings("maxTone");
+                console.log("before load")
+                const s = await fs.get_all_settings()
+                console.log(s)
+                const loadedMin = s["minTone"]
+                const loadedMax = s["maxTone"]
+                console.log("loaded min:" + loadedMin + " max:" + loadedMax);
                 if (loadedMin != null) {
-                    console.log("min " + minTone + " -> " + loadedMin)
-                    setMinTone(loadedMin)
+                    console.log("min " + minTone + " -> " + loadedMin);
+                    setMinTone(loadedMin);
                 }
 
                 if (loadedMax != null) {
-                    console.log("max " + maxTone + " -> " + loadedMax)
-                    setMaxTone(loadedMax)
+                    console.log("max " + maxTone + " -> " + loadedMax);
+                    setMaxTone(loadedMax);
                 }
+                if ("enable_photo" in s) {
+                    setEnablePhoto(s["enable_photo"])
+                }
+                fixSelectedTone()
             })();
-        }, [])
-    );
+        }
+    }, [isFocused]);
+
 
     const tonesInRange = useMemo(() => {
         if (minTone > maxTone) return [];
@@ -81,6 +93,15 @@ const HomeScreen = ({ navigation }) => {
         return result;
     }, [minTone, maxTone]);
 
+    const fixSelectedTone = () => {
+        console.log("fixSelectedTone")
+        if (selectedTone > maxTone) {
+            setSelectedTone(maxTone)
+        }
+        if (selectedTone < minTone) {
+            setSelectedTone(minTone)
+        }
+    }
     const showOverlay = () => {
         setTempTone(selectedTone);
         setModalVisible(true);
@@ -164,8 +185,9 @@ const HomeScreen = ({ navigation }) => {
                     onPress={() => {
                         if (hasPermission && micPermission) {
                             const Mic = require('./MicCheck').default
+                            db.reset()
                             Mic.startMeasure(selectedTone)
-                            navigation.navigate('Measure', { order: 1, tone: selectedTone, individual: mode === 'individual' })
+                            navigation.navigate('Measure', { order: 1, tone: selectedTone, individual: mode === 'individual', photo: enablePhoto })
                         } else {
                             Alert.alert("Not Granted", "You need to grant camera permission.")
                         }

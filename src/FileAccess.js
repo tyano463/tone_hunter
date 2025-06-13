@@ -24,6 +24,7 @@ const fs = {
                 settings = JSON.parse(content);
             }
             settings[key] = value;
+            console.log("save " + key + ": " + value)
             await RNFS.writeFile(settingsFilePath, JSON.stringify(settings, null, 2), 'utf8');
         } catch (err) {
             console.warn("Failed to save settings:", err);
@@ -40,7 +41,7 @@ const fs = {
         } catch (err) {
             console.warn("Failed to load settings:", err);
         }
-        cb(value)
+        return value
     },
     clear_settings: async () => {
         try {

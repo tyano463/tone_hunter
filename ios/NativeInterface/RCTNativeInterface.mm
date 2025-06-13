@@ -141,6 +141,22 @@ using namespace facebook;
   RCTLogInfo(@"Audio engine stopped");
 }
 
+- (void)dumpFloatBufferAsHex:(float *)buffer length:(NSUInteger)length{
+    const uint8_t *bytePtr = (const uint8_t *)buffer;
+    NSUInteger totalBytes = length * sizeof(float);
+
+    NSMutableString *output = [NSMutableString string];
+
+    for (NSUInteger i = 0; i < totalBytes; i++) {
+        if (i % 16 == 0 && i != 0) {
+            [output appendString:@"\n"];
+        }
+        [output appendFormat:@"%02X ", bytePtr[i]];
+    }
+
+    RCTLogInfo(@"\n%@", output);
+}
+
 - (void)processAudioBuffer:(AVAudioPCMBuffer *)buffer {
   AVAudioFrameCount frameLength = buffer.frameLength;
   float *sourceData = buffer.floatChannelData[0];
@@ -163,6 +179,7 @@ using namespace facebook;
       analysisBuffer[i] = destData[pos];
     }
     float *p = analysisBuffer;
+    // [self dumpFloatBufferAsHex:p length:48];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       float pitch = [self analyzePitchWithBuffer:p length:4410];
       RCTLogInfo(@"Pitch: %f", pitch);

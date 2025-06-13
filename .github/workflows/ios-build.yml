@@ -1,0 +1,27 @@
+steps:
+  - uses: actions/checkout@v3
+
+  - name: Install Node.js
+    uses: actions/setup-node@v3
+    with:
+      node-version: '24.2.0'  # 例、プロジェクトに合わせて
+
+  - name: Install npm dependencies
+    run: npm install
+
+  - name: Setup Ruby
+    uses: ruby/setup-ruby@v1
+    with:
+      ruby-version: 2.6.10
+
+  - name: Install Ruby gems
+    run: bundle install
+
+  - name: Install CocoaPods dependencies
+    run: cd ios && bundle exec pod install
+
+  - name: Build iOS app
+    run: |
+      cd ios
+      xcodebuild -workspace YourApp.xcworkspace -scheme YourScheme -sdk iphoneos -configuration Release clean build
+

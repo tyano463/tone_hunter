@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Button, View, Text, StyleSheet, TouchableOpacity, Switch, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker'
 import Slider from '@react-native-community/slider';
@@ -19,16 +19,23 @@ const SettingsScreen = ({ navigation }) => {
     const [maxTempTone, setMaxTempTone] = useState(maxTone)
     const [rangeError, setRangeError] = useState("")
 
+    const saveTimer = useRef(null);
+
     const tonePresets = [
         {
+            name: "Old Guy Bass",
+            minTone: 36,
+            maxTone: 55,
+        },
+        {
             name: "Normal",
-            minTone: 55,
+            minTone: 57,
             maxTone: 72,
         },
         {
-            name: "Instruments",
-            minTone: 55,
-            maxTone: 100,
+            name: "High-Pitched Kid",
+            minTone: 60,
+            maxTone: 84,
         },
         {
             name: "Developper",
@@ -44,33 +51,58 @@ const SettingsScreen = ({ navigation }) => {
             noteName: util.midiToNoteName(midi),
         };
     });
+    useEffect(() => {
+        console.log("playSample changed:", playSample);
+    }, [playSample]);
 
     useFocusEffect(
         useCallback(() => {
             (async () => {
-                const loadedMin = await fs.load_settings("minTone");
-                const loadedMax = await fs.load_settings("maxTone");
-                if (loadedMin != null) {
-                    console.log("min " + minTone + " -> " + loadedMin)
-                    setMinTone(loadedMin)
+                const s = await fs.get_all_settings()
+                if ("enable_photo" in s) {
+                    console.log("update enable_photo:" + s["enable_photo"])
+                    setEnablePhoto(s["enable_photo"] === "true" || s["enable_photo"] === true);
                 }
-
-                if (loadedMax != null) {
-                    console.log("max " + maxTone + " -> " + loadedMax)
-                    setMaxTone(loadedMax)
+                if ("play_sample" in s) {
+                    console.log("update play_sample:" + s["play_sample"])
+                    setPlaySample(s["play_sample"] === "true" || s["play_sample"] === true);
+                    console.log("playSample:" + playSample)
+                }
+                if ("minTone" in s && s["minTone"]) {
+                    console.log("update minTone:" + s["minTone"])
+                    setMinTone(s["minTone"])
+                }
+                if ("maxTone" in s && s["maxTone"]) {
+                    console.log("update maxTone:" + s["maxTone"])
+                    setMaxTone(s["maxTone"])
                 }
             })();
         }, [])
     );
 
-    const on_enable_photo_changed = () => {
-        setEnablePhoto(previousState => !previousState)
-        fs.save_settings("enable_photo", enablePhoto)
+    const on_enable_photo_changed = (v) => {
+        setEnablePhoto(v)
+        fs.save_settings("enable_photo", v)
     }
-    const on_play_sample_changed = () => {
-        setPlaySample(previousState => !previousState)
-        fs.save_settings("play_sample", playSample)
+    const on_play_sample_changed = (v) => {
+        console.log("on_play_sample_changed " + v)
+        fs.save_settings("play_sample", v)
+        setPlaySample(v)
     }
+
+
+    const on_people_count_changed = (v) => {
+        setCount(v);
+
+        if (saveTimer.current) {
+            clearTimeout(saveTimer.current);
+        }
+
+        saveTimer.current = setTimeout(() => {
+            fs.save_settings("result_people", v);
+            console.log("result_people: ", v);
+        }, 100);
+    };
 
     const on_range_changed = (v) => {
         if (v.name == "Developper") {
@@ -78,10 +110,20 @@ const SettingsScreen = ({ navigation }) => {
             setMaxTempTone(maxTone)
             showOverlay()
         } else {
-            setRangeMode(v.name)
+            setRangeMode(v.name);
+            fs.save_settings("mode", v.name)
+            updateToneRange(v.minTone, v.maxTone)
         }
     }
 
+    const updateToneRange = (min, max) => {
+        (async () => {
+            await fs.save_settings("minTone", min)
+            await fs.save_settings("maxTone", max)
+            console.log("save tone range")
+        })();
+
+    }
     const showOverlay = () => {
         setModalVisible(true);
     }
@@ -97,8 +139,10 @@ const SettingsScreen = ({ navigation }) => {
         } else {
             setRangeError("")
             setRangeMode("Developper")
+            fs.save_settings("mode", v.name)
             setMinTone(minTempTone)
             setMaxTone(maxTempTone)
+            updateToneRange(minTempTone, maxTempTone)
         }
         hideOverlay()
     }
@@ -128,7 +172,7 @@ const SettingsScreen = ({ navigation }) => {
                             <Text style={styles.range_item}>
                                 {isNaN(v.minTone) || isNaN(v.maxTone)
                                     ? "? - ?"
-                                    : `${v.minTone} - ${v.maxTone}`}
+                                    : `${util.midiToNoteName(v.minTone)} - ${util.midiToNoteName(v.maxTone)}`}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -213,7 +257,7 @@ const SettingsScreen = ({ navigation }) => {
                         maximumValue={10}
                         step={1}
                         value={count}
-                        onValueChange={value => setCount(value)}
+                        onValueChange={on_people_count_changed}
                         minimumTrackTintColor="#1fb28a"
                         maximumTrackTintColor="#d3d3d3"
                         thumbTintColor="#1a9274"
@@ -247,10 +291,12 @@ const styles = StyleSheet.create({
     },
     item_title: {
         fontSize: 18,
+        marginBottom: 10,
     },
     range_item: {
-        width: 100,
+        width: 160,
         marginLeft: 30,
+        minHeight: 24,
     },
     settings_container: {
     },

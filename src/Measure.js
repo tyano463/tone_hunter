@@ -1,21 +1,66 @@
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, Button, StyleSheet, PermissionsAndroid, Platform, TouchableOpacity } from 'react-native';
 import { Camera, useCameraDevice, PhotoFile } from 'react-native-vision-camera';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import util from './utils';
+import db from './db';
+import fs from './FileAccess';
 
 const MeasureScreen = ({ navigation, route }) => {
-    const { order, tone, individual } = route.params
+    const { order, tone, individual, photo } = route.params
     const device = useCameraDevice('front')
     const cameraRef = useRef(null)
+    const [measuredPitch, setMeasuredPitch] = useState(0.0)
 
     const [selectedTone, setSelectedTone] = useState(tone)
 
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if (individual) {
+            (async () => {
+                console.log("re-calculate target")
+                const s = await fs.get_all_settings()
+                let from = 55
+                let to = 72
+
+                if (
+                    "minTone" in s &&
+                    "maxTone" in s &&
+                    typeof s["minTone"] === "number" &&
+                    typeof s["maxTone"] === "number"
+                ) {
+                    const minTone = s["minTone"]
+                    const maxTone = s["maxTone"]
+                    if (
+                        minTone >= 21 && minTone <= 108 &&
+                        maxTone >= 21 && maxTone <= 108 &&
+                        maxTone >= minTone
+                    ) {
+                        from = minTone
+                        to = maxTone
+                    }
+                }
+
+                const target = Math.floor(Math.random() * (to - from + 1)) + from
+                setSelectedTone(target)
+            })()
+        }
+    }, [isFocused]);
+
     console.log("order: " + order + " tone:" + tone + " indiv:" + individual)
+    let before = { tone: 0, pitch: 0 }
     const emitter = new NativeEventEmitter(NativeModules.ToneEventEmitter);
     useEffect(() => {
         const sub = emitter.addListener('onMeasureUpdate', (data) => {
-            console.log('Update:', data);
+            if (data.pitch == before.pitch && data.tone == before.tone) {
+            } else {
+                console.log('Update:', data);
+                before.pitch = data.pitch
+                before.tone = data.tone
+                setMeasuredPitch(data.pitch)
+            }
         });
 
         return () => {
@@ -24,10 +69,17 @@ const MeasureScreen = ({ navigation, route }) => {
     }, []);
 
     const confirm_measure = () => {
-
+        const record = {
+            order: order,
+            targetTone: selectedTone,
+            measuredPitch: measuredPitch,
+        }
+        db.addEntry(record)
     }
 
-    const shoot = async () => {
+    const shoot = async (o) => {
+        if (!photo) return
+
         try {
             if (cameraRef.current == null) {
                 console.log('Camera not ready');
@@ -38,12 +90,18 @@ const MeasureScreen = ({ navigation, route }) => {
                 flash: 'off',
             });
 
-            console.log(`Photo saved at: ${photo.path}`);
-
+            console.log(`order:${o} Photo saved at: ${photo.path}`);
+            db.updatePhotoPath(o, photo.path)
         } catch (e) {
             console.log(`Failed to take photo: ${e.message}`);
         }
     };
+
+    const to_next_person = async () => {
+        confirm_measure()
+        shoot(order)
+        navigation.replace('Measure', { order: order + 1, tone: tone, individual: individual, photo: photo })
+    }
 
 
     if (device == null) {
@@ -59,9 +117,7 @@ const MeasureScreen = ({ navigation, route }) => {
                 <TouchableOpacity
                     style={styles.nextButton}
                     onPress={() => {
-                        confirm_measure()
-                        shoot()
-                        navigation.replace('Measure', { order: order + 1, tone: tone, individual: individual })
+                        to_next_person()
                     }}
                 >
                     <Text style={styles.nextButtonText}>Measure</Text>
@@ -74,7 +130,7 @@ const MeasureScreen = ({ navigation, route }) => {
                     onPress={() => {
                         const Mic = require('./MicCheck').default
                         Mic.stopMeasure()
-                        navigation.navigate('Result', { order: order + 1, tone: tone, individual: individual })
+                        navigation.navigate('Result', { order: order + 1, tone: tone, individual: individual, photo: photo })
                     }}
                 />
             </View>

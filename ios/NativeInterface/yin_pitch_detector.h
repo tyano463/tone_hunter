@@ -15,6 +15,7 @@ extern "C" {
 #include <stdio.h>
 
 float yin_get_pitch(const float* audioBuffer, int length, int sampleRate);
+float fft_get_pitch(const float* audioBuffer, int length, int sampleRate);
 
 #ifdef __cplusplus
 }
