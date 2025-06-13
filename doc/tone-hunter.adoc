@@ -1,0 +1,95 @@
+# Tone Hunter
+:toc:
+:toc-levels: 3
+:toc-title: 目次
+:nofooter:
+:sectnums:
+:figure-caption: 図
+:table-caption: 表
+
+
+## 概要
+
+複数人から一人を選ぶ場合に
+じゃんけんに代わるゲームを提供します
+
+
+## 画面
+
+以下の画面を持ちます
+
+.画面一覧
+[options="autowidth"]
+|===
+| 画面名 | 説明 | 備考
+
+| 開始画面 | 起動時にこの画面になります | 
+| 音声取得画面 |  | 開始画面にボタンやラベルが追加されただけです
+| 結果発表画面 | 順位を表示します | 
+| 設定画面 | 順位表示などを設定します |
+| 説明画面 | 遊び方の説明画面です |
+| ライセンス表示画面 | OSSのライセンスを表示するだけです |
+|===
+
+
+### 画面遷移
+
+image::https://kroki.io/graphviz/svg/eNptkMtKw0AUhvd5iqErhUofoMQncKXuShe5HJPBoQmTkVrERZuVFKoLqRe8oBZ6QYtQRGykLzOkad_CXJpJqmYTfs73_2fOr2ODKraJ9pjCYJ8qNQczbNXQiYTCL9SHOqbyzm451jVLB1RxTMUGWbWOi8hhDQLyASYE9CKK_ppFLCoTbJjMoNColqXYWSoh7na4-83dM94c--PbYDaMJw5TKEMVoqhA5MKy2_b77UKYHC_RMNUI_ElWyRFUkyfVnV_e4NJb3j9v1J3NQork4h8n_su7f971Z1cpyDKQCjD4uJg_3AU308XTIAVpBtoCXAzeomNWiJ0hkCGj1_l1J0UgQ4hAuDvkrR5vedyd8NZXtLQ3TR0kdqQ1LpufQd_7r8Ot7bAN0UqkmCggr5KZvaZAHJZPgTWVpFDRVX6W-Ig4bLXhVPoB5DXl9A==[状態遷移]
+
+### 画面詳細
+
+#### 開始画面
+
+以下のボタンを持ちます
+
+.ボタン一覧
+[options="autowidth"]
+|===
+| ボタン名| 機能| 備考
+
+| 開始 | ゲームを開始します |
+| ターゲットの音程設定 | 音程を設定します |
+| サンプル再生 | ターゲットの音程を指定した場合のみ押せます | 
+| ヘルプ | 遊び方の画面を表示します|  
+| 設定 | 設定画面に遷移します|  
+|===
+
+#### 音声取得画面
+
+以下のボタンを持ちます
+
+.ボタン一覧
+[options="autowidth"]
+|===
+| ボタン名| 機能| 備考
+
+| 計測 | ゲームを開始します |
+| 終了 | 最後の人はこれを押してゲーム終了 |
+|===
+
+また、ターゲットの音名を表示します
+
+#### 結果発表画面
+
+1位から順に一覧を表示します
+
+`次のゲーム` ボタンのみを表示します
+
+誤操作防止のため、表示から10秒は押せないようにします
+
+
+#### 設定画面
+
+
+以下の機能を設定する画面です
+
+.設定可能な機能一覧
+[options="autowidth"]
+|===
+| 機能名 | 設定項目| 備考   
+
+| 音程範囲 | 設定する音程の範囲 |
+| サンプル誤再生防止 | これをONにするとサンプル再生ボタンが押せません |
+| 写真 | 認識を写真ではなく、順番のみで判定 |
+| 結果発表に表示する人数 | 1〜7 |
+|===
