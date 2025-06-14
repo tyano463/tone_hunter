@@ -95,7 +95,7 @@ using namespace facebook;
   measureTimer = nil;
   
   [self startAudioEngine];
-  RCTLogInfo(@"Measure started tone:%d", currentTone);
+  RCTLogInfo(@"Measure started tone:%ld", currentTone);
 }
 
 - (void)measureStop {
@@ -180,11 +180,13 @@ using namespace facebook;
     }
     float *p = analysisBuffer;
     // [self dumpFloatBufferAsHex:p length:48];
+    __weak __typeof(self)weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      __strong __typeof(weakSelf) strongSelf = weakSelf;
       float pitch = [self analyzePitchWithBuffer:p length:4410];
       RCTLogInfo(@"Pitch: %f", pitch);
       NSDictionary *body = @{
-        @"tone": @(currentTone),
+        @"tone": @(strongSelf->currentTone),
         @"pitch": @(pitch)
       };
       [ToneEventEmitter sendMeasureUpdate:body];

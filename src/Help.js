@@ -16,40 +16,51 @@ const HelpScreen = ({ navigation }) => {
                     onPress={() => navigation.navigate('Licenses')}
                 />
             </View>
-            <ScrollView>
-                <Text>1. Tap "Fixed" and select the target pitch.</Text>
-                <Text>2. Press "Start" and sing a note close to the selected pitch.</Text>
-                <Text>3. When you're ready, press "Measure".</Text>
-                <Text>4. Pass the phone to the next person.</Text>
-                <Text>5. The next person should sing a note close to the same pitch.</Text>
-                <Text>6. Repeat steps 4 and 5.</Text>
-                <Text>7. The last person should tap "Finish".</Text>
-                <Text>8. The results will be displayed.</Text>
+            <ScrollView style={{ paddingLeft: 5 }}>
+                <Text style={styles.helpText}>1. Tap "Fixed" and select the target pitch.</Text>
+                <Text style={styles.helpText}>2. Press "Start" to begin the measurement session.</Text>
+                <Text style={styles.helpText}>3. Start singing the target pitch steadily.</Text>
+                <Text style={styles.helpText}>4. When you think you've hit the pitch perfectly, press "Measure" at that exact moment.</Text>
+                <Text style={styles.helpText}>5. Pass the phone to the next person.</Text>
+                <Text style={styles.helpText}>6. Repeat steps 3–5 for each participant.</Text>
+                <Text style={styles.helpText}>7. When everyone is done, tap "Finish" to see the results.</Text>
 
-                <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Notice:</Text>
-                <Text>
+                <Text style={[styles.helpText, { fontWeight: 'bold' }]}>Notice:</Text>
+
+                <Text style={styles.noticeText}>
                     This app is not a precision tuning tool.{"\n"}
-                    The pitch detection used in this app is based on a simplified {' '}
-                    <TouchableOpacity onPress={() => Linking.openURL('https://pubs.aip.org/asa/jasa/article-abstract/111/4/1917/547221/YIN-a-fundamental-frequency-estimator-for-speech')}>
-                        <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>YIN algorithm</Text>
-                    </TouchableOpacity>{' '}.
+                    The pitch detection used in this app is based on a simplified{" "}
+                    <Text
+                        style={styles.linkText}
+                        onPress={() =>
+                            Linking.openURL(
+                                'https://pubs.aip.org/asa/jasa/article-abstract/111/4/1917/547221/YIN-a-fundamental-frequency-estimator-for-speech'
+                            )
+                        }
+                    >
+                        YIN algorithm
+                    </Text>.
                 </Text>
 
-                <Pressable
-                    onPress={() =>
-                        Linking.openURL(
-                            'https://github.com/tyano463/tone_hunter/blob/main/ios/NativeInterface/yin_pitch_detector.c'
-                        )
-                    }
-                >
-                    <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
-                        View source code on GitHub
-                    </Text>
-                </Pressable>
+                <Text style={styles.noticeText}>
+                    The full source code of this app is available on{" "}
+                    <Text
+                        style={styles.linkText}
+                        onPress={() =>
+                            Linking.openURL(
+                                'https://github.com/tyano463/tone_hunter'
+                            )
+                        }
+                    >
+                        GitHub
+                    </Text>.
+                </Text>
 
-                <Text style={{ marginTop: 10 }}>
-                    Please do not use this app as a substitute for musical instruments in games,{"\n"}
-                    and do not bring your instrument to a music shop based on this app's results if it sounds out of tune.
+                <Text style={styles.noticeText}>
+                    This app is a game for measuring the pitch of human singing voices.{"\n"}
+                    It is not intended for tuning or evaluating musical instruments.{"\n"}
+                    Please do not use the results of this app to judge whether an instrument is in tune,{" "}
+                    or bring your instrument to a music shop based on the pitch shown in this app.
                 </Text>
             </ScrollView>
         </View>
@@ -68,7 +79,20 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
+    },
+    helpText: {
+        fontSize: 18,
+        lineHeight: 20,
+        marginBottom: 8,
+    },
+    noticeText: {
+        fontSize: 18,
+        lineHeight: 24,
+    },
+    linkText: {
+        color: 'blue',
+        textDecorationLine: 'underline',
     }
-})
+});
 
 export default HelpScreen

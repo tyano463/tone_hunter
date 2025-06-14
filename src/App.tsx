@@ -24,8 +24,8 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <SafeAreaView style={{flex:1}}>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Measure" component={MeasureScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />

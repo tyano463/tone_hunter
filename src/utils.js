@@ -14,8 +14,12 @@ const util = {
     },
     calcDiffCent: (measuredHz, targetHz) => {
         const cent = 1200 * Math.log2(measuredHz / targetHz);
-        console.log("t: " + targetHz + " m:" + measuredHz +  " c:" + cent)
+        console.log("t: " + targetHz + " m:" + measuredHz + " c:" + cent)
         return cent
+    },
+    frequencyToMidiNote: (frequency) => {
+        const midi = 69 + 12 * Math.log2(frequency / 440);
+        return Math.min(108, Math.max(0, Math.round(midi)));
     }
 }
 

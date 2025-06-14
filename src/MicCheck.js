@@ -5,11 +5,11 @@ const Mic = {
         console.log("wrapper in")
         NativeInterface?.checkPermission(cb)
     },
-    test: function() {
+    test: function () {
         console.log("test in")
         NativeInterface?.test()
     },
-    startMeasure: function (tone ) {
+    startMeasure: function (tone) {
         console.log("measure start wrapper in mic")
         NativeInterface?.measureStart(tone)
     },

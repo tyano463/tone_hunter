@@ -38,7 +38,7 @@ const SettingsScreen = ({ navigation }) => {
             maxTone: 84,
         },
         {
-            name: "Developper",
+            name: "Developer",
             minTone: minTone,
             maxTone: maxTone,
         },
@@ -58,7 +58,12 @@ const SettingsScreen = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
             (async () => {
+                console.log("before settings load")
                 const s = await fs.get_all_settings()
+                if ("mode" in s) {
+                    console.log("mode: " + s["mode"])
+                    setRangeMode(s["mode"])
+                }
                 if ("enable_photo" in s) {
                     console.log("update enable_photo:" + s["enable_photo"])
                     setEnablePhoto(s["enable_photo"] === "true" || s["enable_photo"] === true);
@@ -105,19 +110,19 @@ const SettingsScreen = ({ navigation }) => {
     };
 
     const on_range_changed = (v) => {
-        if (v.name == "Developper") {
+        if (v.name == "Developer") {
             setMinTempTone(minTone)
             setMaxTempTone(maxTone)
             showOverlay()
         } else {
             setRangeMode(v.name);
-            fs.save_settings("mode", v.name)
-            updateToneRange(v.minTone, v.maxTone)
+            updateToneRange(v.name , v.minTone, v.maxTone)
         }
     }
 
-    const updateToneRange = (min, max) => {
+    const updateToneRange = (mode, min, max) => {
         (async () => {
+            await fs.save_settings("mode", mode)
             await fs.save_settings("minTone", min)
             await fs.save_settings("maxTone", max)
             console.log("save tone range")
@@ -138,11 +143,10 @@ const SettingsScreen = ({ navigation }) => {
             return
         } else {
             setRangeError("")
-            setRangeMode("Developper")
-            fs.save_settings("mode", v.name)
+            setRangeMode("Developer")
             setMinTone(minTempTone)
             setMaxTone(maxTempTone)
-            updateToneRange(minTempTone, maxTempTone)
+            updateToneRange("Developer", minTempTone, maxTempTone)
         }
         hideOverlay()
     }

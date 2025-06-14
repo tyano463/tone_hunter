@@ -1,27 +1,61 @@
-steps:
-  - uses: actions/checkout@v3
+name: iOS Build
 
-  - name: Install Node.js
-    uses: actions/setup-node@v3
-    with:
-      node-version: '24.2.0'  # 例、プロジェクトに合わせて
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-  - name: Install npm dependencies
-    run: npm install
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-latest
 
-  - name: Setup Ruby
-    uses: ruby/setup-ruby@v1
-    with:
-      ruby-version: 2.6.10
+    steps:
+      - uses: actions/checkout@v4
 
-  - name: Install Ruby gems
-    run: bundle install
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.2.0"
 
-  - name: Install CocoaPods dependencies
-    run: cd ios && bundle exec pod install
+      - name: Install npm dependencies
+        run: npm install
 
-  - name: Build iOS app
-    run: |
-      cd ios
-      xcodebuild -workspace YourApp.xcworkspace -scheme YourScheme -sdk iphoneos -configuration Release clean build
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6.10
 
+      - name: Install Ruby gems
+        run: bundle install
+
+      - name: Install CocoaPods dependencies
+        run: cd ios && bundle exec pod install
+
+      # - name: Build iOS app
+      #   run: |
+      #     cd ios
+      #     xcodebuild -workspace tone_hunter.xcworkspace -scheme tone_hunter -sdk iphoneos -configuration Release clean build
+
+      - name: Archive app
+        run: |
+          xcodebuild -workspace tone_hunter.xcworkspace \
+                     -scheme tone_hunter \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -archivePath build/tone_hunter.xcarchive \
+                     archive
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+                     -archivePath build/tone_hunter.xcarchive \
+                     -exportOptionsPlist ExportOptions.plist \
+                     -exportPath build/ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tone_hunter.ipa
+          path: build/ipa/tone_hunter.ipa

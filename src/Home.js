@@ -56,8 +56,12 @@ const HomeScreen = ({ navigation }) => {
         if (isFocused) {
             console.log("isFocused");
             (async () => {
+
                 console.log("before load")
                 const s = await fs.get_all_settings()
+                if ("last_tone" in s) {
+                    setSelectedTone(s["last_tone"])
+                }
                 console.log(s)
                 const loadedMin = s["minTone"]
                 const loadedMax = s["maxTone"]
@@ -112,12 +116,15 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const confirmTone = () => {
+        fs.save_settings("last_tone", tempTone)
         setSelectedTone(tempTone);
         setModalVisible(false);
     };
 
     const updateRandomTone = () => {
-        setSelectedTone(Math.floor(Math.random() * (maxTone - minTone + 1)) + minTone)
+        const tone = Math.floor(Math.random() * (maxTone - minTone + 1)) + minTone
+        setSelectedTone(tone)
+        fs.save_settings("last_tone", tone)
     }
 
     return (
