@@ -1,5 +1,5 @@
-import { useFocusEffect, useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Modal, Alert, Button, Text, View, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import { Camera } from 'react-native-vision-camera';
 import { Picker } from '@react-native-picker/picker'
@@ -12,6 +12,7 @@ const HomeScreen = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState(false)
     const [micPermission, setMicPermission] = useState(false)
     const [enablePhoto, setEnablePhoto] = useState(true)
+    const [playSample, setPlaySample] = useState(false)
 
     const [minTone, setMinTone] = useState(55);
     const [maxTone, setMaxTone] = useState(72);
@@ -78,6 +79,9 @@ const HomeScreen = ({ navigation }) => {
                 if ("enable_photo" in s) {
                     setEnablePhoto(s["enable_photo"])
                 }
+                if ("play_sample" in s) {
+                    setPlaySample(s["play_sample"])
+                }
                 fixSelectedTone()
             })();
         }
@@ -115,16 +119,34 @@ const HomeScreen = ({ navigation }) => {
         setModalVisible(false);
     };
 
+    const play_sample = (target) => {
+        if (playSample) {
+            const Mic = require('./MicCheck').default
+            Mic.play_sample_sound(target)
+            setTimeout(() => {
+                Mic.stop_sample_sound()
+            }, 1500)
+        }
+    }
+
+    const stop_sample = () => {
+        if (playSample) {
+            const Mic = require('./MicCheck').default
+            Mic.stop_sample_sound()
+        }
+    }
     const confirmTone = () => {
         fs.save_settings("last_tone", tempTone)
         setSelectedTone(tempTone);
         setModalVisible(false);
+        play_sample(tempTone)
     };
 
     const updateRandomTone = () => {
         const tone = Math.floor(Math.random() * (maxTone - minTone + 1)) + minTone
         setSelectedTone(tone)
         fs.save_settings("last_tone", tone)
+        play_sample(tone)
     }
 
     return (
@@ -191,6 +213,7 @@ const HomeScreen = ({ navigation }) => {
                     style={styles.startButton}
                     onPress={() => {
                         if (hasPermission && micPermission) {
+                            stop_sample()
                             const Mic = require('./MicCheck').default
                             db.reset()
                             Mic.startMeasure(selectedTone)

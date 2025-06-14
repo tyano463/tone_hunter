@@ -3416,7 +3416,7 @@
     "path": "/Users/tyano/workspace/iphone/tone_hunter/node_modules/toidentifier",
     "licenseFile": "/Users/tyano/workspace/iphone/tone_hunter/node_modules/toidentifier/LICENSE"
   },
-  "tone_hunter@0.0.1": {
+  "tone_hunter@1.0.0": {
     "licenses": "UNLICENSED",
     "private": true,
     "path": "/Users/tyano/workspace/iphone/tone_hunter",

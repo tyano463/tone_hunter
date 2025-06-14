@@ -13,7 +13,7 @@ const ResultScreen = ({ navigation }) => {
     useEffect(() => {
         async function loadNum() {
             const loadedNum = await fs.load_settings("result_people");
-            if (isNaN(loadedNum)) {
+            if (isNaN(loadedNum) || loadedNum < 1 || !Number.isInteger(loadedNum)) {
                 setNum(7);
             } else {
                 setNum(loadedNum);
@@ -27,12 +27,18 @@ const ResultScreen = ({ navigation }) => {
         return <Text>Loading...</Text>;
     }
 
+    console.log("n:" + num + " db:")
+    console.log(db)
+
     const results = db.getAll().map((entry) => {
         const targetHz = util.midiToFrequency(entry.targetTone);
         const diff = Math.abs(entry.measuredPitch - targetHz);
         const diffCent = util.calcDiffCent(entry.measuredPitch, targetHz);
         return { ...entry, diff, diffCent };
     }).sort((a, b) => a.diffCent - b.diffCent);
+
+    console.log("results:")
+    console.log(results)
 
     const limitedResults = results.slice(0, num);
     const first = limitedResults[0];
@@ -41,14 +47,18 @@ const ResultScreen = ({ navigation }) => {
 
     return (
         <>
-            <Text> Result</Text>
+            <Text style={styles.title}> Result</Text>
             <View style={styles.container}>
                 {first && (
                     <View style={styles.firstPlace}>
                         <Text style={styles.rankText}>{"🥇 1st (" + first.order + ")"}</Text>
                         <Text>{util.midiToNoteName(first.targetTone)} → {util.midiToNoteName(util.frequencyToMidiNote(first.measuredPitch))}</Text>
                         <Text>{`cent: ${first.diffCent.toFixed(2)}`}</Text>
-                        <Image source={{ uri: first.photoPath }} style={styles.firstPhoto} />
+                        {first.photoPath ? (
+                            <Image source={{ uri: first.photoPath }} style={styles.firstPhoto} />
+                        ) :
+                            <Image source={dummyPhoto} style={styles.firstPhoto} />
+                        }
                     </View>
                 )}
 
@@ -59,7 +69,11 @@ const ResultScreen = ({ navigation }) => {
                                 <Text style={styles.rankText}>
                                     {(i === 0 ? '🥈 2nd' : '🥉 3rd') + " (" + v.order + ")"}
                                 </Text>
-                                <Image source={{ uri: v.photoPath }} style={styles.mediumPhoto} />
+                                {v.photoPath ? (
+                                    <Image source={{ uri: v.photoPath }} style={styles.mediumPhoto} />
+                                ) : (
+                                    <Image source={dummyPhoto} style={styles.mediumPhoto} />
+                                )}
                             </View>
                         ))}
                     </View>
@@ -69,23 +83,29 @@ const ResultScreen = ({ navigation }) => {
                     <View style={styles.othersContainer}>
                         {others.map((v, i) => (
                             <View key={v.order} style={styles.otherItem}>
-                                <Text>{`${i + 4}位: (${v.order})`}</Text>
+                                <Text>{`${i + 4}th: (${v.order})`}</Text>
                                 {
                                     v.photoPath ? (
                                         <Image source={{ uri: v.photoPath }} style={styles.otherPhoto} />
-                                    ) : (<Image source={{ dummyPhoto }} style={styles.otherPhoto} />)
+                                    ) : (<Image source={dummyPhoto} style={styles.otherPhoto} />)
                                 }
                             </View>
                         ))}
                     </View>
                 )}
             </View>
-            <DelayButton onPress={() => navigation.navigate('Home')} />
+            <DelayButton onPress={() => navigation.navigate('Home')} delay={results.length < 2 ? 0 : 10} />
         </>
     );
 };
 
 const styles = StyleSheet.create({
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginVertical: 12,
+    },
     photo: {
         width: 100,
         height: 100,

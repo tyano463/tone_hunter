@@ -1,0 +1,24 @@
+default_platform(:ios)
+
+lane :build_only do
+  gym(
+    scheme: "tone_hunter",
+    workspace: "tone_hunter.xcworkspace",
+    export_method: "app-store",
+    export_options: {
+      method: "app-store",
+      teamID: ENV["DEVELOPMENT_TEAM"],
+      uploadBitcode: false,
+      uploadSymbols: true,
+      compileBitcode: true,
+      destination: "export",
+      signingStyle: "automatic",
+      stripSwiftSymbols: true,
+      thinning: "<none>"
+    },
+    clean: true,
+    silent: false,
+    xcargs: "-verbose",
+    disable_xcpretty: true
+  )
+end

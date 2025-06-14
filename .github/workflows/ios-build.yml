@@ -9,10 +9,44 @@ on:
 jobs:
   build:
     name: Build iOS App
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Select Xcode 16.4
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - name: Decode provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "${{secrets.IOS_PROVISIONING_PROFILE}}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/tone-hunter.mobileprovision
+          echo "mobileprovision md5"
+          cat ~/Library/MobileDevice/Provisioning\ Profiles/tone-hunter.mobileprovision | wc
+          md5 ~/Library/MobileDevice/Provisioning\ Profiles/tone-hunter.mobileprovision
+
+      - name: Decode certificate
+        run: |
+          echo "${{secrets.IOS_DIST_CERT}}" | base64 -d > ios_dist.p12
+          echo "p12 md5"
+          cat ios_dist.p12 | wc
+          md5 ios_dist.p12
+
+      - name: Import certificate
+        run: |
+          mkdir -p ~/Library/Keychains
+          if [ -f ~/Library/Keychains/build.keychain-db ]; then
+            security delete-keychain ~/Library/Keychains/build.keychain-db
+          fi
+          security create-keychain -p "${{secrets.IOS_DIST_CERT_PASSWORD}}" ~/Library/Keychains/build.keychain-db
+          security unlock-keychain -p "${{secrets.IOS_DIST_CERT_PASSWORD}}" ~/Library/Keychains/build.keychain-db
+          security set-keychain-settings ~/Library/Keychains/build.keychain-db
+          security list-keychains -s ~/Library/Keychains/build.keychain-db
+          security default-keychain -s ~/Library/Keychains/build.keychain-db
+          security import .github/certificates/AppleWWDRCAG3.cer -k ~/Library/Keychains/build.keychain-db -T /usr/bin/codesign
+          security import ios_dist.p12 -k ~/Library/Keychains/build.keychain-db -P "${{secrets.IOS_DIST_CERT_PASSWORD}}" -T /usr/bin/codesign -A
+          security set-key-partition-list -S "apple-tool:,apple:," -s -k "${{secrets.IOS_DIST_CERT_PASSWORD}}" ~/Library/Keychains/build.keychain-db
+          security find-identity -v -p codesigning ~/Library/Keychains/build.keychain-db
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -25,37 +59,61 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6.10
+          ruby-version: 3.3.3
 
       - name: Install Ruby gems
         run: bundle install
 
       - name: Install CocoaPods dependencies
-        run: cd ios && bundle exec pod install
-
-      # - name: Build iOS app
-      #   run: |
-      #     cd ios
-      #     xcodebuild -workspace tone_hunter.xcworkspace -scheme tone_hunter -sdk iphoneos -configuration Release clean build
-
-      - name: Archive app
         run: |
-          xcodebuild -workspace tone_hunter.xcworkspace \
-                     -scheme tone_hunter \
-                     -sdk iphoneos \
-                     -configuration Release \
-                     -archivePath build/tone_hunter.xcarchive \
-                     archive
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          rm -rf ios/Pods
+          cd ios
+          bundle exec pod install
 
-      - name: Export IPA
+      #- name: Check codesign
+      #  run: |
+      #    codesign -vvvv --dryrun --sign "Apple Distribution: Takayuki Yano" ios/Pods/SomeFramework.framework
+
+      - name: Pod Script Check
         run: |
-          xcodebuild -exportArchive \
-                     -archivePath build/tone_hunter.xcarchive \
-                     -exportOptionsPlist ExportOptions.plist \
-                     -exportPath build/ipa
+          cat "ios/Pods/Target Support Files/Pods-tone_hunter/Pods-tone_hunter-frameworks.sh"
+          cp github.Pods-tone_hunter-frameworks.sh "ios/Pods/Target Support Files/Pods-tone_hunter/Pods-tone_hunter-frameworks.sh"
+          cat -n "ios/Pods/Target Support Files/Pods-tone_hunter/Pods-tone_hunter-frameworks.sh"
+          chmod +x "ios/Pods/Target Support Files/Pods-tone_hunter/Pods-tone_hunter-frameworks.sh"
+
+      - name: Build IPA with Fastlane
+        env:
+          PODS_ROOT: "$(pwd)/ios/Pods"
+          MATCH_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          APPLE_PROVISIONING_PROFILE_SPECIFIER: ${{secrets.APPLE_PROVISIONING_PROFILE_SPECIFIER}}
+          APPLE_DEVELOPMENT_TEAM: ${{secrets.APPLE_DEVELOPMENT_TEAM}}
+          CODE_SIGN_IDENTITY: "Apple Distribution"
+          PROVISIONING_PROFILE_SPECIFIER: ${{secrets.APPLE_PROVISIONING_PROFILE_SPECIFIER}}
+          DEVELOPMENT_TEAM: ${{secrets.APPLE_DEVELOPMENT_TEAM}}
+          PRODUCT_BUNDLE_IDENTIFIER: ${{secrets.PRODUCT_BUNDLE_IDENTIFIER}}
+          binary_archs: "arm64"
+          stripped: ""
+        run: |
+          cd ios
+          echo "PODS_ROOT=${PODS_ROOT}"
+          bundle exec fastlane build_only
+
+      - name: Upload Xcode Gym Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcode-gym-log
+          path: /Users/runner/Library/Logs/gym/tone_hunter-tone_hunter.log
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: tone_hunter.ipa
-          path: build/ipa/tone_hunter.ipa
+          path: ios/tone_hunter.ipa
+
+
+      - name: Revert Key-Chain
+        run: |
+          security default-keychain -s login.keychain-db
+          security list-keychains -s login.keychain-db

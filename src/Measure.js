@@ -1,7 +1,7 @@
-import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, Button, StyleSheet, PermissionsAndroid, Platform, TouchableOpacity } from 'react-native';
-import { Camera, useCameraDevice, PhotoFile } from 'react-native-vision-camera';
+import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { Camera, useCameraDevice } from 'react-native-vision-camera';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import util from './utils';
 import db from './db';
@@ -86,12 +86,12 @@ const MeasureScreen = ({ navigation, route }) => {
                 return;
             }
 
-            const photo = await cameraRef.current.takePhoto({
+            const taken = await cameraRef.current.takePhoto({
                 flash: 'off',
             });
 
-            console.log(`order:${o} Photo saved at: ${photo.path}`);
-            db.updatePhotoPath(o, photo.path)
+            console.log(`order:${o} Photo saved at: ${taken.path}`);
+            db.updatePhotoPath(o, taken.path)
         } catch (e) {
             console.log(`Failed to take photo: ${e.message}`);
         }
@@ -104,22 +104,25 @@ const MeasureScreen = ({ navigation, route }) => {
     }
 
 
-    if (device == null) {
+    if (photo && (device == null)) {
         return <Text>Initializing the camera......</Text>
     }
 
     return (
         <View style={styles.container}>
             <View style={styles.cameraWrapper}>
-                <Camera ref={cameraRef} style={styles.camera} device={device} isActive={true} photo={true} />
+                {photo ? (
+                    <Camera ref={cameraRef} style={styles.camera} device={device} isActive={true} photo={true} />
+                ) : (
+                    <View style={styles.camera} />
+                )}
                 <Text style={styles.orderText}>order: {order}</Text>
-                <Text style={styles.targetText}>{"" + util.midiToNoteName(selectedTone)}</Text>
-                <TouchableOpacity
-                    style={styles.nextButton}
+                <Text style={[styles.targetText, !photo && { color: '#222' }
+                ]} >{"" + util.midiToNoteName(selectedTone)}</Text>
+                <TouchableOpacity style={styles.nextButton}
                     onPress={() => {
                         to_next_person()
-                    }}
-                >
+                    }} >
                     <Text style={styles.nextButtonText}>Measure</Text>
                 </TouchableOpacity>
 

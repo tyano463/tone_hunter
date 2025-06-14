@@ -11,7 +11,7 @@ const SettingsScreen = ({ navigation }) => {
     const [maxTone, setMaxTone] = useState(72)
     const [playSample, setPlaySample] = useState(false)
     const [enablePhoto, setEnablePhoto] = useState(true)
-    const [count, setCount] = useState(5)
+    const [count, setCount] = useState(7)
     const [rangeMode, setRangeMode] = useState("Normal")
     const [isModalVisible, setModalVisible] = useState(false)
 
@@ -81,6 +81,11 @@ const SettingsScreen = ({ navigation }) => {
                     console.log("update maxTone:" + s["maxTone"])
                     setMaxTone(s["maxTone"])
                 }
+
+                if ("result_people" in s && s["result_people"]) {
+                    console.log("update result_people:" + s["result_people"])
+                    setCount(s["result_people"])
+                }
             })();
         }, [])
     );
@@ -116,7 +121,7 @@ const SettingsScreen = ({ navigation }) => {
             showOverlay()
         } else {
             setRangeMode(v.name);
-            updateToneRange(v.name , v.minTone, v.maxTone)
+            updateToneRange(v.name, v.minTone, v.maxTone)
         }
     }
 
