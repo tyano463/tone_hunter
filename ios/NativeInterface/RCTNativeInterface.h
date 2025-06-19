@@ -13,6 +13,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RCTNativeInterface : RCTEventEmitter <NativeInterfaceSpec>
 
++ (instancetype)sharedInstance;
+- (void)stopAudioEngine;
+- (void)initAudioEngine;
+
 @end
 
 NS_ASSUME_NONNULL_END

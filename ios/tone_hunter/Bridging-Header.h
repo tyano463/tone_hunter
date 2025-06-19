@@ -9,5 +9,6 @@
 #define Bridging_Header_h
 
 #import <React/RCTBridgeModule.h>
+#import "AudioEngineWrapper.h"
 
 #endif /* Bridging_Header_h */

@@ -36,6 +36,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     return true
   }
+
+  func stopMicrophone() {
+    let session = AVAudioSession.sharedInstance()
+    do {
+      try session.setActive(false, options: .notifyOthersOnDeactivation)
+      print("Audio session deactivated")
+    } catch {
+      print("Failed to deactivate audio session: \(error)")
+    }
+  }
+
+  func stopAudio(){
+    AudioEngineWrapper.shared().stop()
+    stopMicrophone()
+  }
+
+  func resumeAudio() {
+    AudioEngineWrapper.shared().start()
+  }
+
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    stopAudio()
+  }
+
+  func sceneWillEnterForeground(_ scene: UIScene) {
+    // resumeAudio()
+  }
+
+  func applicationWillTerminate(_ application: UIApplication) {
+    stopAudio()
+  }
 }
 
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {

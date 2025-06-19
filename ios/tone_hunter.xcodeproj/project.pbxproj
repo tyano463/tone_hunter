@@ -11,6 +11,8 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		5343D2B06675C891DDC1E78E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		764519382E04A30A00A55E6D /* AudioEngineController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 764519372E04A30A00A55E6D /* AudioEngineController.mm */; };
+		7645193A2E04A43300A55E6D /* AudioEngineWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 764519392E04A43300A55E6D /* AudioEngineWrapper.m */; };
 		765DEABC2DFA988D00DFC182 /* ToneEventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 765DEABB2DFA988D00DFC182 /* ToneEventEmitter.m */; };
 		766AC0382DFAC22100E2F51F /* yin_pitch_detector.c in Sources */ = {isa = PBXBuildFile; fileRef = 766AC0372DFAC22100E2F51F /* yin_pitch_detector.c */; };
 		76CBBFCE2E0252A800F0DCD6 /* ci_pre_xcodebuild.sh in Resources */ = {isa = PBXBuildFile; fileRef = 76CBBFCD2E0252A800F0DCD6 /* ci_pre_xcodebuild.sh */; };
@@ -27,12 +29,16 @@
 		5709B34CF0A7D63546082F79 /* Pods-tone_hunter.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tone_hunter.release.xcconfig"; path = "Target Support Files/Pods-tone_hunter/Pods-tone_hunter.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-tone_hunter.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-tone_hunter.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = tone_hunter/AppDelegate.swift; sourceTree = "<group>"; };
+		764519372E04A30A00A55E6D /* AudioEngineController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AudioEngineController.mm; sourceTree = "<group>"; };
+		764519392E04A43300A55E6D /* AudioEngineWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudioEngineWrapper.m; sourceTree = "<group>"; };
+		7645193B2E04A45000A55E6D /* AudioEngineWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AudioEngineWrapper.h; sourceTree = "<group>"; };
 		765DEABA2DFA988D00DFC182 /* ToneEventEmitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ToneEventEmitter.h; sourceTree = "<group>"; };
 		765DEABB2DFA988D00DFC182 /* ToneEventEmitter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ToneEventEmitter.m; sourceTree = "<group>"; };
 		766AC0362DFAC22100E2F51F /* yin_pitch_detector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = yin_pitch_detector.h; sourceTree = "<group>"; };
 		766AC0372DFAC22100E2F51F /* yin_pitch_detector.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = yin_pitch_detector.c; sourceTree = "<group>"; };
 		767CC5A62DF9BAD800418824 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Bridging-Header.h"; path = "tone_hunter/Bridging-Header.h"; sourceTree = "<group>"; };
 		76CBBFCD2E0252A800F0DCD6 /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
+		76CBBFD42E04919A00F0DCD6 /* AudioEngineController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AudioEngineController.h; sourceTree = "<group>"; };
 		76D9D5302DFA66D6006CF9EB /* RCTNativeInterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeInterface.h; sourceTree = "<group>"; };
 		76D9D5312DFA66D6006CF9EB /* RCTNativeInterface.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RCTNativeInterface.mm; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = tone_hunter/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -87,8 +93,12 @@
 				76D9D5302DFA66D6006CF9EB /* RCTNativeInterface.h */,
 				765DEABA2DFA988D00DFC182 /* ToneEventEmitter.h */,
 				76D9D5312DFA66D6006CF9EB /* RCTNativeInterface.mm */,
+				76CBBFD42E04919A00F0DCD6 /* AudioEngineController.h */,
 				766AC0362DFAC22100E2F51F /* yin_pitch_detector.h */,
 				766AC0372DFAC22100E2F51F /* yin_pitch_detector.c */,
+				764519372E04A30A00A55E6D /* AudioEngineController.mm */,
+				764519392E04A43300A55E6D /* AudioEngineWrapper.m */,
+				7645193B2E04A45000A55E6D /* AudioEngineWrapper.h */,
 				765DEABB2DFA988D00DFC182 /* ToneEventEmitter.m */,
 			);
 			path = NativeInterface;
@@ -287,6 +297,8 @@
 				766AC0382DFAC22100E2F51F /* yin_pitch_detector.c in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 				765DEABC2DFA988D00DFC182 /* ToneEventEmitter.m in Sources */,
+				7645193A2E04A43300A55E6D /* AudioEngineWrapper.m in Sources */,
+				764519382E04A30A00A55E6D /* AudioEngineController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
