@@ -212,14 +212,15 @@ const HomeScreen = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.startButton}
                     onPress={() => {
-                        if (hasPermission && micPermission) {
+                        if ((!enablePhoto || hasPermission) && micPermission) {
                             stop_sample()
                             const Mic = require('./MicCheck').default
                             db.reset()
                             Mic.startMeasure(selectedTone)
                             navigation.navigate('Measure', { order: 1, tone: selectedTone, individual: mode === 'individual', photo: enablePhoto })
                         } else {
-                            Alert.alert("Not Granted", "You need to grant camera permission.")
+                            const target = enablePhoto ? "Camera/Mic" : "Mic"
+                            Alert.alert("Not Granted", "You need to grant " + target + " permission.")
                         }
                     }}
                 >
