@@ -144,6 +144,16 @@ static RCTNativeInterface *_sharedInstance = nil;
 - (void)initAudioEngine {
   if (_audioEngine != nil) return;
 
+  AVAudioSession *session = [AVAudioSession sharedInstance];
+
+  [session setCategory:AVAudioSessionCategoryPlayAndRecord
+           withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
+                 error:nil];
+  
+  [session setMode:AVAudioSessionModeDefault error:nil];
+  
+  [session setActive:YES error:nil];
+
   _audioEngine = [[AVAudioEngine alloc] init];
   if (!_circularBuffer) {
     AVAudioInputNode *inputNode = _audioEngine.inputNode;
